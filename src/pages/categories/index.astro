@@ -1,0 +1,5 @@
+---
+import Layout from '../../layouts/Layout.astro';import {posts,pathTo} from '../../lib/snapshot';import {categories} from '../../lib/defaults';
+const all=[...new Set([...categories,...posts.map(p=>p.category)])];const tags=[...new Set(posts.flatMap(p=>p.tags))];
+---
+<Layout title="分类与标签"><section class="container page-heading"><span class="eyebrow">FIND YOUR THREAD</span><h1>沿着兴趣，往下读<span class="heading-dot">.</span></h1><p>从一个主题开始，发现更多记录。</p></section><section class="container section-bottom"><div class="category-grid">{all.map((name,i)=><a href={pathTo(`categories/${encodeURIComponent(name)}/`)} class="category-card"><span class="category-num">0{i+1}</span><h2>{name} ↗</h2><p>{posts.filter(p=>p.category===name).length} 篇记录</p></a>)}</div><h2 class="subheading">标签</h2><div class="tags large">{tags.length?tags.map(tag=><a href={pathTo(`tags/${encodeURIComponent(tag)}/`)}>#{tag}</a>):<p class="muted">标签会随着文章慢慢丰富起来。</p>}</div></section></Layout>

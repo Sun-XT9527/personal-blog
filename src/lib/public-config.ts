@@ -1,0 +1,1 @@
+export const publicConfig={"url":"https://spb-9wis0ky4nvb4lvh5.supabase.opentrust.net","anonKey":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiIsInJlZiI6InNwYi05d2lzMGt5NG52YjRsdmg1IiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3ODcxNDY2ODQsImV4cCI6MjEwMjcyMjY4NH0.Iq5EmZLNdqpNGm-MWVHfcyH1SmlfNSqIayv4ONwWHvo"};

@@ -1,0 +1,2 @@
+import {build} from 'esbuild';import fs from 'node:fs/promises';
+await fs.mkdir('.private/functions',{recursive:true});for(const name of ['blog-message','blog-publish','blog-release-status']){await build({entryPoints:[`supabase/functions/${name}/index.ts`],outfile:`.private/functions/${name}.ts`,bundle:true,platform:'neutral',format:'esm',target:'es2022',logLevel:'silent'});}console.log('三个后台接口已打包。');

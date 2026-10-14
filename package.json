@@ -1,0 +1,38 @@
+{
+  "name": "sun-xt-blog",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "node scripts/load-snapshot.mjs && astro build",
+    "preview": "astro preview --host 127.0.0.1",
+    "check": "astro check",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "setup": "node scripts/setup.mjs"
+  },
+  "dependencies": {
+    "@astrojs/react": "latest",
+    "@supabase/supabase-js": "latest",
+    "@tiptap/extension-code-block-lowlight": "latest",
+    "@tiptap/extension-image": "latest",
+    "@tiptap/extension-placeholder": "latest",
+    "@tiptap/react": "latest",
+    "@tiptap/starter-kit": "latest",
+    "astro": "latest",
+    "lowlight": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "shiki": "latest"
+  },
+  "devDependencies": {
+    "@astrojs/check": "latest",
+    "@modelcontextprotocol/sdk": "latest",
+    "@types/node": "^26.6.5",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "libsodium-wrappers": "^0.8.4",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}

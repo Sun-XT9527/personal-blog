@@ -1,0 +1,4 @@
+---
+import Layout from '../layouts/Layout.astro';import Messages from '../components/Messages';
+---
+<Layout title="留言板"><section class="container page-heading"><span class="eyebrow">A CONVERSATION STARTS HERE</span><h1>路过，也可以停一停<span class="heading-dot">.</span></h1><p>这里没有门槛，只有一个可以交流的小角落。</p></section><div class="container guestbook-wrap section-bottom"><Messages client:load /></div></Layout>
