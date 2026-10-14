@@ -1,0 +1,3 @@
+import fs from 'node:fs/promises';
+const source=await fs.readFile('src/lib/public-config.ts','utf8');const cfg=JSON.parse(source.slice(source.indexOf('=')+1).replace(/;\s*$/,''));
+for(const name of ['blog-publish','blog-message','blog-release-status']){const response=await fetch(cfg.url+'/functions/v1/'+name,{method:'POST',headers:{apikey:cfg.anonKey,Authorization:'Bearer '+cfg.anonKey,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(30000)});const data=await response.json().catch(()=>({}));console.log(JSON.stringify({name,status:response.status,error:data.error,message:data.message,code:data.code}));}
