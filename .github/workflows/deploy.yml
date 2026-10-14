@@ -2,6 +2,8 @@ name: Publish blog
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '2-57/5 * * * *'
   workflow_dispatch:
     inputs:
       release_id:
@@ -17,10 +19,27 @@ concurrency:
   cancel-in-progress: false
 env:
   ASTRO_TELEMETRY_DISABLED: '1'
-  BLOG_RELEASE_ID: ${{ inputs.release_id }}
 jobs:
-  publish:
+  select:
     runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.selection.outputs.release_id }}
+      should_build: ${{ steps.selection.outputs.should_build }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - id: selection
+        run: node scripts/pick-release.mjs
+        env:
+          REQUESTED_RELEASE_ID: ${{ inputs.release_id }}
+  publish:
+    needs: select
+    if: needs.select.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    env:
+      BLOG_RELEASE_ID: ${{ needs.select.outputs.release_id }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -32,7 +51,7 @@ jobs:
           cache: npm
       - run: npm ci --no-audit --no-fund
       - name: Mark publication running
-        if: inputs.release_id != ''
+        if: env.BLOG_RELEASE_ID != ''
         run: node scripts/report-deployment.mjs building
         env:
           BLOG_CALLBACK_SECRET: ${{ secrets.BLOG_CALLBACK_SECRET }}
@@ -47,12 +66,12 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
       - name: Mark publication online
-        if: success() && inputs.release_id != ''
+        if: success() && env.BLOG_RELEASE_ID != ''
         run: node scripts/report-deployment.mjs live
         env:
           BLOG_CALLBACK_SECRET: ${{ secrets.BLOG_CALLBACK_SECRET }}
       - name: Mark publication failed
-        if: failure() && inputs.release_id != '' && steps.deployment.outcome != 'success'
+        if: failure() && env.BLOG_RELEASE_ID != '' && steps.deployment.outcome != 'success'
         run: node scripts/report-deployment.mjs failed
         env:
           BLOG_CALLBACK_SECRET: ${{ secrets.BLOG_CALLBACK_SECRET }}

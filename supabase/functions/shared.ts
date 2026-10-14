@@ -1,5 +1,5 @@
 export const Deno=(globalThis as unknown as {Deno:{env:{get:(name:string)=>string|undefined};serve:(handler:(request:Request)=>Promise<Response>)=>void}}).Deno;
-export const url=Deno.env.get('SUPABASE_URL')||'https://spb-9wis0ky4nvb4lvh5.supabase.opentrust.net';
+export const url=Deno.env.get('SUPABASE_LOCAL_URL')||Deno.env.get('SUPABASE_URL')||'https://spb-9wis0ky4nvb4lvh5.supabase.opentrust.net';
 const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')||'';
 export async function api(path:string,method='GET',body?:unknown,token=key){if(!key)throw new Error('server_not_configured');const response=await fetch(url+path,{method,headers:{apikey:key,Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(20000)});const data=await response.json().catch(()=>null);if(!response.ok)throw new Error(data?.message||data?.msg||'backend_unavailable');return data;}
 export const rpc=(name:string,body:unknown)=>api('/rest/v1/rpc/'+name,'POST',body);
