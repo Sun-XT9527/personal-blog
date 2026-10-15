@@ -9,16 +9,15 @@ try{
  const post=randomUUID(),first=randomUUID(),next=randomUUID();
  await conn.sql(`BEGIN;
  SELECT set_config('request.jwt.claim.sub','${admin}',true);
- DO $$ DECLARE actual record; stamp timestamptz=now(); blocked boolean=false; BEGIN
+ DO $$ DECLARE actual record; stamp timestamptz=now()-interval '2 minutes'; blocked boolean=false; BEGIN
   INSERT INTO public.blog_drafts(id,slug,title,updated_at) VALUES('${post}','status-check-${post}','状态验收（事务内）',stamp);
   SELECT * INTO actual FROM public.blog_get_article_publication_status() WHERE post_id='${post}';
   IF actual.state<>'draft' THEN RAISE EXCEPTION 'New draft must not be live'; END IF;
-  INSERT INTO public.blog_posts(id,slug,title,excerpt,document,category,tags,published_at,updated_at)
-   SELECT id,slug,title,excerpt,document,category,tags,stamp,stamp FROM public.blog_drafts WHERE id='${post}';
+  PERFORM public.blog_create_release('publish','${post}',(SELECT to_jsonb(d) FROM public.blog_drafts d WHERE id='${post}'),NULL);
   INSERT INTO public.blog_releases(id,sequence,snapshot,status) OVERRIDING SYSTEM VALUE
    SELECT '${first}',900000001,jsonb_build_object('posts',jsonb_agg(to_jsonb(p))),'queued' FROM public.blog_posts p;
   SELECT * INTO actual FROM public.blog_get_article_publication_status() WHERE post_id='${post}';
-  IF actual.state<>'queued' OR actual.has_live_version THEN RAISE EXCEPTION 'Queued content must not report success'; END IF;
+  IF actual.state<>'queued' OR actual.has_live_version OR actual.has_unpublished_changes THEN RAISE EXCEPTION 'Queued content must retain its source version without reporting success'; END IF;
   UPDATE public.blog_releases SET status='building' WHERE id='${first}';
   SELECT * INTO actual FROM public.blog_get_article_publication_status() WHERE post_id='${post}';
   IF actual.state<>'building' THEN RAISE EXCEPTION 'Building state missing'; END IF;
