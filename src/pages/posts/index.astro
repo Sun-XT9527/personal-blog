@@ -1,5 +1,69 @@
 ---
-import Layout from '../../layouts/Layout.astro';import PostCard from '../../components/PostCard.astro';import {posts} from '../../lib/snapshot';import {documentText,jsonForScript} from '../../lib/document';
-const searchData=posts.map(p=>({id:p.id,text:`${p.title} ${p.excerpt} ${documentText(p.document)}`}));
+import Layout from '../../layouts/Layout.astro';
+import PostCard from '../../components/PostCard.astro';
+import {posts} from '../../lib/snapshot';
+import {categories} from '../../lib/categories';
+import {documentText,jsonForScript} from '../../lib/document';
+const searchData=posts.map(post=>({id:post.id,category:post.category,text:`${post.title} ${post.excerpt} ${documentText(post.document)}`}));
 ---
-<Layout title="所有文章"><section class="container page-heading"><span class="eyebrow">THE JOURNAL</span><h1>所有文章<span class="heading-dot">.</span></h1><p>一些记录，一些探索。一点一点积累。</p></section><section class="container section-bottom"><label class="search-box" id="search"><span>⌕</span><input id="article-search" type="search" placeholder="搜索标题或正文…" aria-label="搜索文章"/><kbd>/</kbd></label><p id="search-count" class="muted">共 {posts.length} 篇文章</p><div class="post-grid" id="article-list">{posts.map(post=><div data-post-id={post.id}><PostCard post={post}/></div>)}</div><div id="search-empty" class="empty-state" hidden={posts.length>0}><span class="empty-symbol">✎</span><h3>{posts.length?'没有找到相关记录':'第一篇文章，还在酝酿。'}</h3><p>换一个关键词，或稍后再来看看。</p></div></section><script type="application/json" id="search-data" set:html={jsonForScript(searchData)}/><script>const input=document.querySelector<HTMLInputElement>('#article-search')!;const data=JSON.parse(document.querySelector('#search-data')!.textContent!);input.addEventListener('input',()=>{const term=input.value.toLocaleLowerCase().trim();let count=0;document.querySelectorAll<HTMLElement>('[data-post-id]').forEach(el=>{const item=data.find((p:{id:string})=>p.id===el.dataset.postId);el.hidden=!item.text.toLocaleLowerCase().includes(term);if(!el.hidden)count++});document.querySelector('#search-count')!.textContent=`${term?'找到':'共'} ${count} 篇文章`;document.querySelector<HTMLElement>('#search-empty')!.hidden=count>0});document.addEventListener('keydown',e=>{if(e.key==='/'&&!(e.target instanceof HTMLInputElement)){e.preventDefault();input.focus()}});</script></Layout>
+<Layout title="所有文章">
+  <section class="container page-heading">
+    <span class="eyebrow">THE JOURNAL</span>
+    <h1>所有文章<span class="heading-dot">.</span></h1>
+    <p>一些记录，一些探索。一点一点积累。</p>
+  </section>
+  <section class="container section-bottom">
+    <nav class="article-filters" aria-label="文章分类">
+      <a href="?" data-article-category="" aria-current="true">全部 <span>{posts.length}</span></a>
+      {categories.map(category=><a href={`?category=${encodeURIComponent(category)}`} data-article-category={category}>{category} <span>{posts.filter(post=>post.category===category).length}</span></a>)}
+    </nav>
+    <label class="search-box" id="search"><span>⌕</span><input id="article-search" type="search" placeholder="搜索标题或正文…" aria-label="搜索文章"/><kbd>/</kbd></label>
+    <p id="search-count" class="muted" role="status" aria-live="polite">共 {posts.length} 篇文章</p>
+    <div class="post-grid" id="article-list">{posts.map(post=><div data-post-id={post.id}><PostCard post={post}/></div>)}</div>
+    <div id="search-empty" class="empty-state" hidden={posts.length>0}>
+      <span class="empty-symbol">✎</span>
+      <h3 id="search-empty-title">第一篇文章，还在酝酿。</h3>
+      <p id="search-empty-description">换一个关键词，或稍后再来看看。</p>
+    </div>
+  </section>
+  <script type="application/json" id="search-data" set:html={jsonForScript(searchData)}/>
+  <script>
+    import {isCategory,type Category} from '../../lib/categories';
+    import {matchingArticles,type SearchArticle} from '../../lib/article-search';
+    const input=document.querySelector<HTMLInputElement>('#article-search')!;
+    const data:SearchArticle[]=JSON.parse(document.querySelector('#search-data')!.textContent!);
+    const filters=[...document.querySelectorAll<HTMLAnchorElement>('[data-article-category]')];
+    const cards=[...document.querySelectorAll<HTMLElement>('[data-post-id]')];
+    function categoryFromUrl():Category|'' {
+      const value=new URLSearchParams(window.location.search).get('category');
+      return isCategory(value)?value:'';
+    }
+    let category=categoryFromUrl();
+    function render(){
+      const matches=new Set(matchingArticles(data,input.value,category).map(article=>article.id));
+      cards.forEach(card=>{card.hidden=!matches.has(card.dataset.postId!)});
+      filters.forEach(filter=>{
+        if(filter.dataset.articleCategory===category)filter.setAttribute('aria-current','true');
+        else filter.removeAttribute('aria-current');
+      });
+      document.querySelector('#search-count')!.textContent=`${input.value.trim()||category?'找到':'共'} ${matches.size} 篇文章`;
+      document.querySelector<HTMLElement>('#search-empty')!.hidden=matches.size>0;
+      document.querySelector('#search-empty-title')!.textContent=input.value.trim()?'没有找到相关记录':category?'这个分类还没有文章':'第一篇文章，还在酝酿。';
+      document.querySelector('#search-empty-description')!.textContent=input.value.trim()?'换一个关键词，或切换分类再试试。':category?'切换到其他分类，或稍后再来看看。':'稍后再来看看，新的记录正在路上。';
+    }
+    filters.forEach(filter=>filter.addEventListener('click',event=>{
+      if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+      event.preventDefault();
+      const next=filter.dataset.articleCategory;
+      category=isCategory(next)?next:'';
+      const url=new URL(window.location.href);
+      if(category)url.searchParams.set('category',category);else url.searchParams.delete('category');
+      if(url.href!==window.location.href)window.history.pushState(null,'',url);
+      render();
+    }));
+    input.addEventListener('input',render);
+    window.addEventListener('popstate',()=>{category=categoryFromUrl();render()});
+    document.addEventListener('keydown',event=>{if(event.key==='/'&&!(event.target instanceof HTMLInputElement)){event.preventDefault();input.focus()}});
+    render();
+  </script>
+</Layout>
