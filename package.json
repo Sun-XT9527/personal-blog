@@ -9,7 +9,8 @@
     "preview": "astro preview --host 127.0.0.1",
     "check": "astro check",
     "test": "node --import tsx --test tests/*.test.ts",
-    "setup": "node scripts/setup.mjs"
+    "setup": "node scripts/setup.mjs",
+    "setup:summary": "node scripts/setup-summary.mjs"
   },
   "dependencies": {
     "@astrojs/react": "latest",

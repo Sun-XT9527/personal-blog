@@ -9,3 +9,5 @@
 .publication-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 .publication-actions:empty{display:none}
 .publication-status .publication-help{font-size:11px}
+.editor-sidebar .publication-status{grid-column:1/-1;margin:12px 0 0;padding:16px}
+.editor-sidebar .publication-actions .quiet-button{width:100%;text-align:center}
