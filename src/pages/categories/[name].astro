@@ -1,5 +1,5 @@
 ---
-import Layout from '../../layouts/Layout.astro';import PostCard from '../../components/PostCard.astro';import {posts} from '../../lib/snapshot';import {categories} from '../../lib/defaults';
-export function getStaticPaths(){return [...new Set([...categories,...posts.map(p=>p.category)])].map(name=>({params:{name}}));}const {name}=Astro.params;const selected=posts.filter(p=>p.category===name);
+import Layout from '../../layouts/Layout.astro';import PostCard from '../../components/PostCard.astro';import {posts,pathTo} from '../../lib/snapshot';import {categories,isCategory,legacyCategories} from '../../lib/categories';
+export function getStaticPaths(){return [...categories,...legacyCategories].map(name=>({params:{name}}));}const {name}=Astro.params;if(!isCategory(name))return Astro.redirect(pathTo('categories/'),301);const selected=posts.filter(p=>p.category===name);
 ---
 <Layout title={name}><section class="container page-heading"><span class="eyebrow">CATEGORY</span><h1>{name}<span class="heading-dot">.</span></h1><p>共 {selected.length} 篇记录</p></section><section class="container section-bottom">{selected.length?<div class="post-grid">{selected.map(post=><PostCard post={post}/>)}</div>:<div class="empty-state"><span class="empty-symbol">✎</span><h3>这个主题，等第一篇记录。</h3></div>}</section></Layout>

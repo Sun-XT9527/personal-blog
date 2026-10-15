@@ -4,4 +4,4 @@ import type {Post} from '../lib/types';
 interface Props {post:Post}
 const {post}=Astro.props;
 ---
-<article class="post-card"><a class="post-card-link" href={pathTo(`posts/${post.slug}/`)}>{post.cover&&<img class="post-cover" src={post.cover} alt="" loading="lazy"/>}<div class="post-meta"><span>{post.category}</span><span>{dateText(post.published_at)}</span></div><h3>{post.title}</h3><p>{post.excerpt}</p><div class="post-card-bottom"><div class="tags">{post.tags.map(tag=><span>#{tag}</span>)}</div><span class="read-arrow" aria-hidden="true">↗</span></div></a></article>
+<article class="post-card"><a class="post-card-link" href={pathTo(`posts/${post.slug}/`)}>{post.cover&&<img class="post-cover" src={post.cover} alt="" loading="lazy"/>}<div class="post-meta"><span>{post.category}</span><span>{dateText(post.published_at)}</span></div><h3>{post.title}</h3><p>{post.excerpt}</p><div class="post-card-bottom"><span class="read-arrow" aria-hidden="true">↗</span></div></a></article>

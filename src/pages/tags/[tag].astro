@@ -1,4 +1,0 @@
----
-import Layout from '../../layouts/Layout.astro';import PostCard from '../../components/PostCard.astro';import {posts} from '../../lib/snapshot';export function getStaticPaths(){return [...new Set(posts.flatMap(p=>p.tags))].map(tag=>({params:{tag}}));}const {tag}=Astro.params;const selected=posts.filter(p=>p.tags.includes(tag!));
----
-<Layout title={`#${tag}`}><section class="container page-heading"><span class="eyebrow">TAG</span><h1>#{tag}</h1><p>{selected.length} 篇记录</p></section><section class="container post-grid section-bottom">{selected.map(post=><PostCard post={post}/>)}</section></Layout>
