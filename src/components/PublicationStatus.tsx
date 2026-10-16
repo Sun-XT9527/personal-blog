@@ -1,4 +1,4 @@
-import {publicationLabel,type ArticlePublication} from '../lib/publication-status';
+import {publicationLabel,publicationScheduleDescription,publicationScheduleHours,type ArticlePublication} from '../lib/publication-status';
 import {sitePath} from '../lib/client';
 import '../styles/publication.css';
 export default function PublicationStatus({publication,dirty,unavailable,busy,onRefresh,onRetry}:{publication?:ArticlePublication;dirty:boolean;unavailable:boolean;busy:boolean;onRefresh:()=>void;onRetry:()=>void}){
@@ -12,7 +12,7 @@ export default function PublicationStatus({publication,dirty,unavailable,busy,on
   <div role="status" aria-live="polite" aria-atomic="true">
    <strong>发布状态：{label}</strong>
    {state==='draft'&&<p>这篇文章尚未发布。点击“发布文章”后，可以在这里查看上线结果。</p>}
-   {state==='queued'&&<p>{label==='等待时间较长'?'已等待超过 5 分钟，GitHub 定时任务可能延迟。可以手动启动部署。':withdraw?'撤回请求已提交，正在等待部署。完成后这里会自动更新。':'发布请求已提交，正在等待部署，此时新版本尚未上线。完成后这里会自动更新。'}</p>}
+   {state==='queued'&&<><p>{label==='等待时间较长'?`已等待超过 ${publicationScheduleHours} 小时，GitHub 定时任务可能延迟。可以手动启动部署。`:withdraw?'撤回请求已提交，正在等待部署。完成后这里会自动更新。':'发布请求已提交，正在等待部署，此时新版本尚未上线。完成后这里会自动更新。'}</p><p>{publicationScheduleDescription}</p></>}
    {state==='building'&&<p>{withdraw?'正在更新网页，完成后文章将从博客移除。':'正在生成并部署网页，完成后这里会自动显示上线结果。'}</p>}
    {state==='live'&&<p>发布成功，文章已上线。{unpublished?'当前还有未发布的修改，重新发布后才会更新线上文章。':''}</p>}
    {failed&&<p>{withdraw?'撤回未完成，可以重试。':'发布未完成，已保存的内容仍保留，可以重试。'}{publication?.error&&<span className="publication-detail">{publication.error}</span>}</p>}

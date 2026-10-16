@@ -1,3 +1,5 @@
+import {publicationScheduleDescription} from './publication-status';
+
 export type PublicationAction='publish'|'unpublish'|'delete'|'settings'|'retry';
 export interface PublicationRequest {id:string;action:PublicationAction;target:string}
 export interface ReleaseRecord {id:string;sequence:number;status:string;error?:string|null;created_at:string}
@@ -7,7 +9,7 @@ export function releaseFeedback(request:PublicationRequest,status:string,error?:
  const withdraw=request.action==='unpublish'||request.action==='delete';
  const operation=request.action==='delete'?'移除':withdraw?'撤回':request.action==='retry'?'重新发布':'发布';
  const subject=request.action==='settings'?'个人资料与作品':request.action==='retry'?'当前公开内容':request.target?`《${request.target}》`:'文章';
- if(status==='queued')return {label:`等待${operation}`,message:`${subject}的${operation}请求已提交，正在等待部署；新版本尚未上线。`,failure:false,persistent:true};
+ if(status==='queued')return {label:`等待${operation}`,message:`${subject}的${operation}请求已提交，正在等待部署；新版本尚未上线。${publicationScheduleDescription}`,failure:false,persistent:true};
  if(status==='building')return {label:withdraw?`正在${operation}`:'正在部署',message:`${subject}正在${operation}，完成后会提示结果。`,failure:false,persistent:true};
  if(status==='live')return {label:`${operation}成功`,message:withdraw?`${subject}已从公开页面${operation}。`:`${subject}发布成功，提交的版本已上线。`,failure:false,persistent:false};
  if(status==='failed')return {label:`${operation}失败`,message:`${subject}${operation}失败，上次在线版本仍保留。${error?`原因：${error}`:'请重试或查看发布记录。'}`,failure:true,persistent:true};
